@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import fetchLinkPreview from "../../api/fetchLinkPreview"
 import extractUrls from "../../utils/extractUrls"
-import linkify from "../../utils/linkify"
+import renderContent from "../../utils/renderContent"
 import LinkPreview from "../LinkPreview"
 
 const FirestoreItemContent = ({content}) => {
@@ -31,7 +31,7 @@ const FirestoreItemContent = ({content}) => {
     <div className="post-content">
       <div>
         <p style={{padding: '0'}}>
-          {linkify(content.text)}
+          {renderContent(content.text)}
         </p>
         {
           content.image && (

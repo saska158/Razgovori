@@ -9,7 +9,7 @@ import LinkPreview from "../LinkPreview"
 import ImageUploadButton from "../ImageUploadButton"
 import ChatSmiley from "../ChatSmiley"
 import EmojiPicker from "emoji-picker-react"
-import Textarea from "../Textarea"
+import MentionTextarea from "../MentionTextarea"
 import { ClipLoader } from "react-spinners"
 import ErrorMessage from "../errors/ErrorMessage"
 
@@ -17,26 +17,26 @@ import ErrorMessage from "../errors/ErrorMessage"
 const PostForm = ({firestoreRef, placeholder, setIsPopupShown=()=>{}}) => {
   const initialData = {
     text: '',
-    image: ''
-  }  
+    image: '',
+    mentionedUids: []
+  }
   // Context
   const { user } = useAuth()
-  
+
   // State
   const [data, setData] = useState(initialData)
   const [imagePreview, setImagePreview] = useState(null)
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false) 
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [linkData, setLinkData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Hooks that don't trigger re-renders 
-  const textareaRef = useRef(null)
-  const fileInputRef = useRef(null) 
+  // Hooks that don't trigger re-renders
+  const fileInputRef = useRef(null)
 
   // Functions
-  const handleDataChange = (e) => {
-    setData(prev => ({...prev, text: e.target.value}))
+  const handleDataChange = (newValue, mentionedUids) => {
+    setData(prev => ({...prev, text: newValue, mentionedUids}))
   }
 
   const handleEmojiClick = (emojiObject) => {
@@ -119,11 +119,10 @@ const PostForm = ({firestoreRef, placeholder, setIsPopupShown=()=>{}}) => {
     <form onSubmit={handleOnSubmit} className="post-form">
       { error && <ErrorMessage message={error} /> }
 
-      <Textarea
+      <MentionTextarea
         value={data.text}
         onChange={handleDataChange}
         placeholder={placeholder}
-        textareaRef={textareaRef}
         style={{fontSize: '1.5rem', borderBottom: 'none', background: 'transparent', paddingLeft: '0'}}
         maxLength={270}
       />

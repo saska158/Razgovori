@@ -7,6 +7,7 @@ const PopUp = ({setIsPopUpShown, setShowEmojiPicker = () => {}, children, style}
 
     useEffect(() => {
       const handleClickOutside = (e) => {
+        if (!document.contains(e.target)) return
         if(popUpRef.current && !popUpRef.current.contains(e.target)) {
           setIsPopUpShown(false)
           setShowEmojiPicker(false)

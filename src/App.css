@@ -656,6 +656,20 @@ textarea::placeholder {
   white-space: normal; /* allows wrapping */
 }
 
+/* MENTIONS */
+
+.mention {
+  color: #4b896f;
+  font-weight: 600;
+}
+
+/* react-mentions container inherits textarea global styles via the inner textarea element;
+   override the outer control div so it doesn't get textarea border-radius */
+.mention-input__control {
+  border-radius: 0;
+  background: transparent;
+}
+
 /* POST ACTIONS */
 
 .post-actions {

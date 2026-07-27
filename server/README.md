@@ -133,7 +133,9 @@ This server is designed to demonstrate a true agentic loop — not a linear fetc
 
 ### What makes it agentic
 
-**Non-linear tool selection.** The agent decides which tools to call based on what it finds. A clear high-severity post might only call `get_user_violations` then decide. An ambiguous borderline case might call all five context tools in a different order. The sequence is never predetermined.
+**Non-linear tool selection.** The agent decides which tools to call based on what it finds. A clear high-severity post might only call `get_user_violations` then decide. An ambiguous borderline case might call all context tools in a different order. The sequence is never predetermined. For harassment cases, the agent may call `get_posts_targeting_victim` to detect coordinated pile-ons across multiple users, or `get_posts_by_user_in_room` to find other posts by the same perpetrator — expanding investigation scope dynamically based on what it finds.
+
+**Variable-scope actions.** For harassment cases involving a pattern of posts, the agent can call `remove_additional_post` during investigation — removing discovered posts without stopping the loop — before finalizing with a single `remove_post` or `ban_user`. The number of posts removed is unknown until runtime. The verification prompt tells the agent how many additional posts it has already removed, and the final `decision` event includes an `additionalRemovals` array.
 
 **Reactive reasoning.** Each tool result is added back to the conversation. The agent's next step is informed by what it just learned — not by a fixed script. Reasoning events emitted after tools have been called are flagged `reactive: true` in the SSE stream.
 
@@ -159,7 +161,7 @@ This server is designed to demonstrate a true agentic loop — not a linear fetc
 | `verification` | Agent made a decision — awaiting self-check |
 | `verification_confirmed` | Agent confirmed its decision after reflection |
 | `verification_revised` | Agent changed its decision during verification |
-| `decision` | Final action taken |
+| `decision` | Final action taken; includes `additionalRemovals[]` listing any posts removed during investigation |
 | `skipped_tools` | Tools the agent chose not to call |
 | `done` | Pipeline complete |
 
@@ -188,6 +190,6 @@ Skills are in the `skills/` directory. Each skill is a folder with a `SKILL.md` 
 | Skill | When it's used |
 |---|---|
 | `content-toxicity` | Hate speech, slurs, and explicitly toxic content |
-| `harassment` | Targeted attacks on a specific user, repeated callouts, pile-ons |
+| `harassment` | Targeted attacks on a specific user, repeated callouts, pile-ons, coordinated multi-user harassment |
 | `misinformation` | False claims, health misinformation, deliberately misleading content |
 | `threats-and-violence` | Explicit threats of physical harm, calls for violence |

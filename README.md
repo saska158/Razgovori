@@ -13,10 +13,12 @@ The project has two parts:
 
 When a user reports a post:
 1. A **router agent** (Claude Haiku) reads the report and selects the most appropriate moderation skill
-2. A **moderation agent** (Claude Sonnet) runs an agentic loop — autonomously deciding which tools to call, including `call_perspective` to score toxicity, fetching post content, comments, user history, and violation history from Firestore — and makes a decision
-3. The decision (dismiss / warn / remove / ban) is written back to Firestore in real time
+2. A **moderation agent** (Claude Sonnet) runs an agentic loop — autonomously deciding which tools to call, including `call_perspective` to score toxicity, fetching post content, comments, user history, and violation history from Firestore — and makes a decision. For harassment cases it can also remove additional posts discovered during investigation before finalizing, so the number of actions taken is variable and unknown until runtime.
+3. The decision (dismiss / warn / remove / ban) is written back to Firestore in real time, along with any additional posts removed during investigation
 
 Available skills: `content-toxicity`, `harassment`, `misinformation`, `threats-and-violence`
+
+The harassment skill can detect coordinated pile-ons — cases where multiple users all target the same person and individual posts may look borderline in isolation. This works because the app stores a `mentionedUids[]` field on every post when a user is `@mentioned`, giving the server a queryable signal for who a post is *about*, not just who wrote it.
 
 ---
 

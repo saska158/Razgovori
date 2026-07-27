@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { useAuth } from "../../contexts/authContext" 
+import { useAuth } from "../../contexts/authContext"
 import extractUrls from "../../utils/extractUrls"
 import fetchLinkPreview from "../../api/fetchLinkPreview"
 import { readImageAsDataURL } from "../../utils/readImageAsDataURL"
@@ -9,7 +9,7 @@ import LinkPreview from "../LinkPreview"
 import ImageUploadButton from "../ImageUploadButton"
 import ChatSmiley from "../ChatSmiley"
 import EmojiPicker from "emoji-picker-react"
-import Textarea from "../Textarea"
+import MentionTextarea from "../MentionTextarea"
 import { ClipLoader } from "react-spinners"
 import ErrorMessage from "../errors/ErrorMessage"
 
@@ -17,27 +17,27 @@ import ErrorMessage from "../errors/ErrorMessage"
 const CommentsForm = ({firestoreRef, placeholder, setIsPopupShown=()=>{}}) => {
   const initialData = {
     text: '',
-    image: ''
+    image: '',
+    mentionedUids: []
   }
 
   // Context
   const { user } = useAuth()
-  
+
   // State
   const [data, setData] = useState(initialData)
   const [imagePreview, setImagePreview] = useState(null)
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false) 
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [linkData, setLinkData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Hooks that don't trigger re-renders 
-  const textareaRef = useRef(null)
-  const fileInputRef = useRef(null) 
+  // Hooks that don't trigger re-renders
+  const fileInputRef = useRef(null)
 
   // Functions
-  const handleDataChange = (e) => {
-    setData(prev => ({...prev, text: e.target.value}))
+  const handleDataChange = (newValue, mentionedUids) => {
+    setData(prev => ({...prev, text: newValue, mentionedUids}))
   }
 
   const handleEmojiClick = (emojiObject) => {
@@ -122,11 +122,10 @@ const CommentsForm = ({firestoreRef, placeholder, setIsPopupShown=()=>{}}) => {
       { error && <ErrorMessage message={error} /> }
 
       <div style={{display: 'flex', alignItems: 'flex-end'}}>
-        <Textarea
+        <MentionTextarea
           value={data.text}
           onChange={handleDataChange}
           placeholder={placeholder}
-          textareaRef={textareaRef}
           style={{background: 'transparent'}}
           maxLength={280}
         />

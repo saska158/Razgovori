@@ -126,6 +126,54 @@ const TOOL_DEFINITIONS = [
       },
       required: ['report_id', 'uid', 'room', 'post_id', 'reasoning']
     }
+  },
+  {
+    name: 'get_cross_reports',
+    description: 'Query all reports filed against a specific user. Returns total count, number of unique reporters, and a summary of each report. Call this when the initial evidence suggests a pattern — it reveals whether multiple different people have complained about this user, which distinguishes a repeat offender from a one-off incident.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        uid: { type: 'string', description: 'UID of the reported user' }
+      },
+      required: ['uid']
+    }
+  },
+  {
+    name: 'get_posts_by_user_in_room',
+    description: 'Fetch all current live posts by a user in a specific room. Use this after get_user_history suggests a pattern — it gives the full list of posts in one room so you can identify which ones share the same violation and should be removed alongside the reported post.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        uid: { type: 'string', description: 'UID of the user' },
+        room: { type: 'string', description: 'Collection: watching, reading, or listening' }
+      },
+      required: ['uid', 'room']
+    }
+  },
+  {
+    name: 'remove_additional_post',
+    description: 'Remove a post discovered during investigation that shares the same violation pattern as the reported post. Call this for each additional post that warrants removal — the loop continues after each call so you can keep investigating. Use this before finalizing your decision with remove_post or ban_user.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        room: { type: 'string', description: 'Collection the post lives in' },
+        post_id: { type: 'string', description: 'ID of the post to remove' },
+        uid: { type: 'string', description: 'UID of the post author' },
+        reasoning: { type: 'string', description: 'Why this post warrants removal' }
+      },
+      required: ['room', 'post_id', 'uid', 'reasoning']
+    }
+  },
+  {
+    name: 'get_posts_targeting_victim',
+    description: 'Find all posts across all rooms that mention a specific user (victim_uid). Uses the mentionedUids field stored on each post. Returns posts sorted by recency, with timing analysis and a coordination signal. Call this when a harassment report suggests the victim may be targeted by multiple users — it reveals whether a pile-on is forming across the platform, not just in one thread.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        victim_uid: { type: 'string', description: 'UID of the user who may be the target of coordinated harassment' }
+      },
+      required: ['victim_uid']
+    }
   }
 ]
 
@@ -255,6 +303,77 @@ const executeTool = async (name, input) => {
         reasoning: input.reasoning
       })
       return { success: true }
+    }
+
+    case 'get_cross_reports': {
+      const snap = await db.collection('reports').where('creatorUid', '==', input.uid).get()
+      const reports = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      const uniqueReporters = [...new Set(reports.map(r => r.reportedBy).filter(Boolean))]
+      return {
+        total: reports.length,
+        uniqueReporterCount: uniqueReporters.length,
+        reports: reports.map(r => ({
+          id: r.id,
+          room: r.room,
+          status: r.status,
+          createdAt: r.createdAt
+        }))
+      }
+    }
+
+    case 'get_posts_by_user_in_room': {
+      const snap = await db
+        .collection(input.room)
+        .where('creatorUid', '==', input.uid)
+        .orderBy('timestamp', 'desc')
+        .limit(20)
+        .get()
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    }
+
+    case 'remove_additional_post': {
+      await db.collection(input.room).doc(input.post_id).delete()
+      await recordViolation(input.uid, {
+        type: 'remove',
+        postId: input.post_id,
+        room: input.room,
+        reasoning: input.reasoning,
+        source: 'additional'
+      })
+      return { success: true }
+    }
+
+    case 'get_posts_targeting_victim': {
+      const posts = []
+      for (const room of ROOMS) {
+        const snap = await db
+          .collection(room)
+          .where('mentionedUids', 'array-contains', input.victim_uid)
+          .limit(20)
+          .get()
+        snap.docs.forEach(d => posts.push({ room, id: d.id, ...d.data() }))
+      }
+
+      posts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0))
+
+      const nowSeconds = Date.now() / 1000
+      const postsInLast1h = posts.filter(p => nowSeconds - (p.timestamp?.seconds || 0) < 3600)
+      const postsInLast24h = posts.filter(p => nowSeconds - (p.timestamp?.seconds || 0) < 86400)
+      const uniquePerpetratorUids = [...new Set(posts.map(p => p.creatorUid))]
+
+      const coordinationSignal =
+        postsInLast1h.length >= 3 ? 'high' :
+        postsInLast24h.length >= 5 || uniquePerpetratorUids.length >= 3 ? 'medium' : 'low'
+
+      return {
+        posts,
+        total: posts.length,
+        uniquePerpetratorCount: uniquePerpetratorUids.length,
+        uniquePerpetratorUids,
+        postsInLast1h: postsInLast1h.length,
+        postsInLast24h: postsInLast24h.length,
+        coordinationSignal
+      }
     }
 
     default:

@@ -2,22 +2,19 @@ import { addDoc, serverTimestamp } from "../api/firebase"
 import uploadToCloudinaryAndGetUrl from "./uploadToCloudinaryAndGetUrl"
 
 const sendPostToFirestore =  async (user, data, firestoreRef) => {
+    const { text, image, mentionedUids = [] } = data
     let imageUrl = ''
-   
-    if(data.image) {
-      imageUrl = await uploadToCloudinaryAndGetUrl(data.image)
+
+    if(image) {
+      imageUrl = await uploadToCloudinaryAndGetUrl(image)
     }
-   
-    const newData = {
-      ...data, 
-      image: imageUrl
-    }
-  
+
     await addDoc(firestoreRef, {
-      creatorUid: user.uid,  
-      creatorName: user.displayName, 
+      creatorUid: user.uid,
+      creatorName: user.displayName,
       creatorPhoto: user.photoURL || '',
-      content: newData,
+      content: { text, image: imageUrl },
+      mentionedUids,
       timestamp: serverTimestamp(),
       likes: {},
       comments: []
