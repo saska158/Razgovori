@@ -48,8 +48,8 @@ export const AuthProvider = ({children}) => {
         const presenceRef = ref(database, `presence/${user.uid}`)
         presenceUnsubscribe = onValue(ref(database, '.info/connected'), (snap) => {
           if (snap.val() !== true) return
-          onDisconnect(presenceRef).set(false)
-          set(presenceRef, true)
+          onDisconnect(presenceRef).set({ online: false })
+          set(presenceRef, { online: true })
         })
 
         profileUnsubscribe = onSnapshot(doc(firestore, 'profiles', user.uid), (snap) => {
@@ -116,7 +116,7 @@ export const AuthProvider = ({children}) => {
       const user = auth.currentUser
       if(user) {
         const uid = user.uid
-        await set(ref(database, `presence/${uid}`), false)
+        await set(ref(database, `presence/${uid}`), { online: false })
         await signOut(auth)
         setUser(null)
         console.log("User signed out.")

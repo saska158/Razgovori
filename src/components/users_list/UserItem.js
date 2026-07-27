@@ -10,7 +10,7 @@ const UserItem = ({user}) => {
     if (!user?.uid) return
     const presenceRef = ref(database, `presence/${user.uid}`)
     const unsubscribe = onValue(presenceRef, (snap) => {
-      setIsOnline(snap.val() === true)
+      setIsOnline(snap.val()?.online === true)
     })
     return () => unsubscribe()
   }, [user?.uid])
