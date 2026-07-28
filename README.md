@@ -12,8 +12,8 @@ The project has two parts:
 ### How moderation works
 
 When a user reports a post:
-1. A **router agent** (Claude Haiku) reads the report and selects the most appropriate moderation skill
-2. A **moderation agent** (Claude Sonnet) runs an agentic loop — autonomously deciding which tools to call, including `call_perspective` to score toxicity, fetching post content, comments, user history, and violation history from Firestore — and makes a decision. For harassment cases it can also remove additional posts discovered during investigation before finalizing, so the number of actions taken is variable and unknown until runtime.
+1. A **router agent** (Claude Haiku) reads the report and selects the most appropriate moderation skill. Image-only posts skip the LLM and route directly to `content-toxicity`.
+2. A **moderation agent** (Claude Sonnet) runs an agentic loop — autonomously deciding which tools to call, including `analyze_image` to inspect any attached image (downloaded and sent as base64; AVIF images are converted to JPEG via Cloudinary before analysis), `call_perspective` to score toxicity, and fetching post content, comments, user history, and violation history from Firestore. Post text is passed as context to image analysis so combined threats (e.g. a house photo + "I know where you live") are caught. For harassment cases it can also remove additional posts discovered during investigation before finalizing.
 3. The decision (dismiss / warn / remove / ban) is written back to Firestore in real time, along with any additional posts removed during investigation
 
 Available skills: `content-toxicity`, `harassment`, `misinformation`, `threats-and-violence`

@@ -2,10 +2,10 @@
 
 A Node.js server that runs an agentic content moderation loop for the Razgovori social media app. When a user reports a post, the server:
 
-1. Routes to the best-matching **skill** via Claude Haiku (with retry if no skill is selected)
+1. Routes to the best-matching **skill** via Claude Haiku (with retry if no skill is selected). Image-only posts skip the LLM and route directly to `content-toxicity`.
 2. Runs a **Claude Sonnet moderation agent** that autonomously gathers context and makes a decision: dismiss, warn, remove post, or ban user
 
-The agent decides which tools to call — including `call_perspective` to score the post for toxicity using the Perspective API. The score is gathered as part of the agent's reasoning, not pre-computed before it runs.
+The agent decides which tools to call — including `analyze_image` to inspect attached images (post text is passed as context so combined threats are caught) and `call_perspective` to score the post for toxicity using the Perspective API. Both scores are gathered as part of the agent's reasoning, not pre-computed before it runs.
 
 ---
 
@@ -102,9 +102,12 @@ Triggers the moderation agent for a reported post.
   "room": "watching",
   "reportedBy": "<uid>",
   "creatorUid": "<uid>",
-  "postText": "the post content"
+  "postText": "the post content",
+  "postImage": "https://..."
 }
 ```
+
+`postText` and `postImage` are both optional but at least one must be present. Image-only posts are valid.
 
 **Response:**
 ```json
@@ -146,6 +149,8 @@ This server is designed to demonstrate a true agentic loop — not a linear fetc
 **Autonomous routing with retry.** The router (Claude Haiku) reads available skill files from the filesystem and classifies the report. If it doesn't call `select_skill` on the first attempt, the router sends a follow-up message and retries before falling back.
 
 **Perspective as an agent tool.** The agent calls `call_perspective` itself as one of its context tools, rather than receiving the score as a pre-computed input. This means the toxicity signal appears in the agent's explicit reasoning trace — the agent decides when the score is relevant, weighs it against other context it has gathered, and references it directly in its decision. For violation types where toxicity tone is a weak signal (e.g. calm misinformation), the agent may skip it entirely.
+
+**Image analysis with combined context.** When a post has an image, the agent calls `analyze_image` with the image URL and the post text as context. The vision model (Claude Sonnet) sees both together — a house photo paired with "I know where you live" is flagged as a threat even though each element is benign in isolation. Images are downloaded server-side and sent as base64; AVIF format images are re-fetched as JPEG via a Cloudinary URL extension swap before analysis. If image analysis fails (unsupported format or network error), the agent treats it as missing data rather than evidence of a violation.
 
 ### SSE event types
 
