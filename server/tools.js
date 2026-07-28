@@ -1,9 +1,22 @@
 const { db, admin } = require('./firebase')
 const { analyzeToxicity } = require('./perspective')
+const { analyzeImage } = require('./vision')
 
 const ROOMS = ['watching', 'reading', 'listening']
 
 const TOOL_DEFINITIONS = [
+  {
+    name: 'analyze_image',
+    description: 'Analyze an image in the reported post for visual content violations using Claude Vision. Call this when get_post reveals the post has an image (content.image field is present). Returns severity levels for explicit content, violence, hate symbols, and dangerous content. Visual violations can be severe even when post text is benign — always check the image if one exists.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        image_url: { type: 'string', description: 'The URL of the image to analyze (content.image from get_post)' },
+        context: { type: 'string', description: 'Optional post text to help interpret the image in context' }
+      },
+      required: ['image_url']
+    }
+  },
   {
     name: 'call_perspective',
     description: 'Score the post text for toxicity using the Perspective API. Returns a score from 0 (not toxic) to 1 (very toxic). Call this early — the score is a useful calibration signal. Not all violation types correlate with toxicity (e.g. misinformation often scores low), but it is worth checking.',
@@ -186,6 +199,11 @@ const recordViolation = async (uid, violation) => {
 
 const executeTool = async (name, input) => {
   switch (name) {
+    case 'analyze_image': {
+      const result = await analyzeImage(input.image_url, input.context)
+      return result
+    }
+
     case 'call_perspective': {
       const score = await analyzeToxicity(input.text)
       return { score }

@@ -54,11 +54,20 @@ const SELECT_SKILL_TOOL = (skills) => ({
   }
 })
 
-const runRouter = async ({ postText, room, emit = () => {} }) => {
+const runRouter = async ({ postText, postImage, room, emit = () => {} }) => {
   const skills = getAvailableSkills()
 
   if (!skills.length) {
     console.warn('[router] No skills found, falling back to content-toxicity')
+    return 'content-toxicity'
+  }
+
+  if (!postText?.trim()) {
+    const reasoning = postImage
+      ? 'Image-only post — routed to content-toxicity for visual content review'
+      : 'No post content — defaulting to content-toxicity'
+    console.log(`[router] Skipping LLM: ${reasoning}`)
+    emit({ type: 'routing', skill: 'content-toxicity', reasoning })
     return 'content-toxicity'
   }
 
@@ -70,7 +79,7 @@ const runRouter = async ({ postText, room, emit = () => {} }) => {
       role: 'user',
       content: `Incoming report:
 Room: ${room}
-Post text: "${postText}"
+Post text: "${postText}"${postImage ? '\n(Post also contains an image)' : ''}
 
 Available skills:
 ${skillList}

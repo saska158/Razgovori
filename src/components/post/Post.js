@@ -23,7 +23,7 @@ const RESULT_MESSAGES = {
 const Post = ({post, room, style = {}}) => {
   const { id: postId, creatorUid, content, timestamp } = post
   const { user } = useAuth()
-  const { openTrace, startStream } = useModerationTrace()
+  const { openTrace, startStream, closeTrace } = useModerationTrace()
 
   const [showComments, setShowComments] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
@@ -65,7 +65,7 @@ const Post = ({post, room, style = {}}) => {
       const res = await fetch(`${SERVER_URL}/report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId, room, reportedBy: user.uid, creatorUid, postText: content.text })
+        body: JSON.stringify({ postId, room, reportedBy: user.uid, creatorUid, postText: content.text || '', postImage: content.image || '' })
       })
       const data = await res.json()
       if (!data.reportId) throw new Error('No reportId returned')
@@ -77,6 +77,7 @@ const Post = ({post, room, style = {}}) => {
 
     } catch {
       setReportState('done')
+      closeTrace()
     }
   }
 

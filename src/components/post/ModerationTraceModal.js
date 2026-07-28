@@ -111,34 +111,43 @@ const ToolRow = ({ tool, label, result, done }) => {
   const isWarning = WARNING_TOOLS.has(tool)
   const pillColor = isWarning ? '#92400e' : '#3d7a60'
   const pillBg   = isWarning ? '#fef3c7' : '#dcfce7'
+  const longResult = result && result.length > 40
 
   return (
     <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
       padding: '6px 10px',
       borderRadius: '6px',
       background: '#f9fafb',
       marginBottom: '4px',
     }}>
-      <span style={{ fontSize: '0.8rem', flexShrink: 0 }}>{TOOL_ICON[tool] || '⚙'}</span>
-      <span style={{ fontSize: '0.78rem', color: '#374151', flex: 1 }}>{label}</span>
-      {done
-        ? result && (
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 600,
-            color: pillColor,
-            background: pillBg,
-            padding: '2px 9px',
-            borderRadius: '999px',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}>{result}</span>
-        )
-        : <Spinner />
-      }
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span style={{ fontSize: '0.8rem', flexShrink: 0 }}>{TOOL_ICON[tool] || '⚙'}</span>
+        <span style={{ fontSize: '0.78rem', color: '#374151', flex: 1 }}>{label}</span>
+        {done
+          ? result && !longResult && (
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 600,
+              color: pillColor,
+              background: pillBg,
+              padding: '2px 9px',
+              borderRadius: '999px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}>{result}</span>
+          )
+          : <Spinner />
+        }
+      </div>
+      {done && longResult && (
+        <p style={{
+          margin: '4px 0 0',
+          fontSize: '0.72rem',
+          color: pillColor,
+          lineHeight: 1.5,
+          paddingLeft: '24px',
+        }}>{result}</p>
+      )}
     </div>
   )
 }
@@ -403,7 +412,7 @@ const ModerationTraceModal = ({ events, isLoading, onClose }) => {
         </div>
 
         {/* Event log */}
-        <div style={{ overflowY: 'auto', padding: '12px 18px', flex: 1 }}>
+        <div style={{ overflowY: 'auto', overflowX: 'hidden', padding: '12px 18px', flex: 1 }}>
           {processed.length === 0 && (
             <p style={{ fontSize: '0.8rem', color: '#aaa', fontStyle: 'italic' }}>Waiting for agent…</p>
           )}

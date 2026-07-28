@@ -7,9 +7,10 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const DECISION_TOOLS = new Set(['dismiss_report', 'warn_user', 'remove_post', 'ban_user'])
 const ACCUMULATING_TOOLS = new Set(['remove_additional_post'])
-const CONTEXT_TOOLS = new Set(['call_perspective', 'get_post', 'get_comments', 'get_user_history', 'get_user_violations', 'get_reporter_history', 'get_cross_reports', 'get_posts_by_user_in_room', 'get_posts_targeting_victim'])
+const CONTEXT_TOOLS = new Set(['analyze_image', 'call_perspective', 'get_post', 'get_comments', 'get_user_history', 'get_user_violations', 'get_reporter_history', 'get_cross_reports', 'get_posts_by_user_in_room', 'get_posts_targeting_victim'])
 
 const TOOL_LABELS = {
+  analyze_image: 'Analyzing image content',
   call_perspective: 'Scoring toxicity',
   get_post: 'Fetching post content',
   get_comments: 'Reading community reaction',
@@ -27,8 +28,16 @@ const TOOL_LABELS = {
 }
 
 const summarizeResult = (toolName, result) => {
-  if (result?.error) return `Error: ${result.error}`
+  if (result?.error) return toolName === 'analyze_image' ? 'Format error — skipped' : `Error: ${result.error}`
   switch (toolName) {
+    case 'analyze_image': {
+      const flags = []
+      if (result.explicit && result.explicit !== 'none') flags.push(`explicit:${result.explicit}`)
+      if (result.violence && result.violence !== 'none') flags.push(`violence:${result.violence}`)
+      if (result.hate_symbols) flags.push('hate symbols')
+      if (result.dangerous_content) flags.push('dangerous content')
+      return flags.length > 0 ? `Flagged — ${flags.join(', ')}` : `Safe — ${result.summary}`
+    }
     case 'call_perspective': return `Score: ${result.score.toFixed(3)}`
     case 'get_post': return 'Post fetched'
     case 'get_comments': return `${result.length} comment${result.length !== 1 ? 's' : ''}`
@@ -43,7 +52,7 @@ const summarizeResult = (toolName, result) => {
   }
 }
 
-const runModerationAgent = async ({ reportId, postId, room, reportedBy, creatorUid, postText, skillName, emit = () => {} }) => {
+const runModerationAgent = async ({ reportId, postId, room, reportedBy, creatorUid, postText, postImage, skillName, emit = () => {} }) => {
   const systemPrompt = buildSystemPrompt(skillName)
 
   const initialContent = `New moderation report.
@@ -53,9 +62,9 @@ Post ID: ${postId}
 Room: ${room}
 Post author (UID): ${creatorUid}
 Reported by (UID): ${reportedBy}
-Post text: "${postText}"
+Post text: "${postText || '(no text — image only post)'}"${postImage ? `\nPost image: ${postImage}` : ''}
 
-Gather the context you need and make a decision.`
+Gather the context you need and make a decision.${postImage ? ' The post contains an image — analyze it with analyze_image.' : ''}`
 
   const messages = [{ role: 'user', content: initialContent }]
 

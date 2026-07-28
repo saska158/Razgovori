@@ -32,16 +32,16 @@ class ReportStream {
 
 const reportStreams = new Map()
 
-const processReport = async (reportId, reportRef, { postId, room, reportedBy, creatorUid, postText }) => {
+const processReport = async (reportId, reportRef, { postId, room, reportedBy, creatorUid, postText, postImage }) => {
   const stream = reportStreams.get(reportId)
   const emit = event => stream?.emit(event)
 
   try {
-    const skillName = await runRouter({ postText, room, emit })
+    const skillName = await runRouter({ postText, postImage, room, emit })
     await reportRef.update({ skillName })
 
     const decision = await runModerationAgent({
-      reportId, postId, room, reportedBy, creatorUid, postText, skillName, emit
+      reportId, postId, room, reportedBy, creatorUid, postText, postImage, skillName, emit
     })
 
     console.log(`[report] Decision for ${reportId}:`, decision)
@@ -58,9 +58,9 @@ const processReport = async (reportId, reportRef, { postId, room, reportedBy, cr
 }
 
 app.post('/report', async (req, res) => {
-  const { postId, room, reportedBy, creatorUid, postText } = req.body
+  const { postId, room, reportedBy, creatorUid, postText = '', postImage = '' } = req.body
 
-  if (!postId || !room || !reportedBy || !creatorUid || !postText) {
+  if (!postId || !room || !reportedBy || !creatorUid || (!postText && !postImage)) {
     return res.status(400).json({ error: 'Missing required fields' })
   }
 
@@ -76,7 +76,7 @@ app.post('/report', async (req, res) => {
     const stream = new ReportStream()
     reportStreams.set(reportId, stream)
 
-    processReport(reportId, reportRef, { postId, room, reportedBy, creatorUid, postText })
+    processReport(reportId, reportRef, { postId, room, reportedBy, creatorUid, postText, postImage })
 
     res.json({ reportId })
   } catch (error) {
