@@ -121,14 +121,16 @@ const CommentsForm = ({firestoreRef, placeholder, setIsPopupShown=()=>{}}) => {
     <form onSubmit={handleOnSubmit} className="comments-form">
       { error && <ErrorMessage message={error} /> }
 
-      <div style={{display: 'flex', alignItems: 'flex-end'}}>
-        <MentionTextarea
-          value={data.text}
-          onChange={handleDataChange}
-          placeholder={placeholder}
-          style={{background: 'transparent'}}
-          maxLength={280}
-        />
+      <div style={{display: 'flex', alignItems: 'flex-end', gap: '.5em'}}>
+        <div style={{flex: 1, minWidth: 0}}>
+          <MentionTextarea
+            value={data.text}
+            onChange={handleDataChange}
+            placeholder={placeholder}
+            style={{background: 'transparent'}}
+            maxLength={280}
+          />
+        </div>
 
         <div className="comments-form-icons-container">
           <ImageUploadButton {...{handleImageChange, fileInputRef}} />

@@ -51,11 +51,14 @@ const MentionTextarea = ({ value, onChange, placeholder, style = {}, maxLength }
       ...mentionsInputStyle['&multiLine'],
       highlighter: {
         ...mentionsInputStyle['&multiLine'].highlighter,
-        paddingLeft: style.paddingLeft || '1em',
+        padding: '0.5em 0',
+        paddingLeft: style.paddingLeft || 0,
         fontSize: style.fontSize || 'inherit',
       },
       input: {
         ...mentionsInputStyle['&multiLine'].input,
+        borderRadius: 0,
+        padding: '0.5em 0',
         ...(style.fontSize && { fontSize: style.fontSize }),
         ...(style.paddingLeft !== undefined && { paddingLeft: style.paddingLeft }),
         ...(style.background !== undefined && { background: style.background }),
