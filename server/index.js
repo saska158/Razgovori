@@ -4,6 +4,7 @@ const express = require('express')
 const cors = require('cors')
 const { runRouter } = require('./router')
 const { runModerationAgent } = require('./agent')
+const { executeTool } = require('./tools')
 const { db, admin } = require('./firebase')
 
 const app = express()
@@ -67,6 +68,8 @@ app.post('/report', async (req, res) => {
   try {
     const reportRef = await db.collection('reports').add({
       postId, room, reportedBy, creatorUid,
+      postText: postText || '',
+      postImage: postImage || '',
       status: 'pending',
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     })
@@ -107,6 +110,28 @@ app.get('/report/:reportId/stream', (req, res) => {
   })
 
   req.on('close', unsubscribe)
+})
+
+app.post('/admin/resolve', async (req, res) => {
+  const { reportId, action, reasoning } = req.body
+  if (!reportId || !action || !reasoning) {
+    return res.status(400).json({ error: 'Missing required fields' })
+  }
+
+  try {
+    const reportDoc = await db.collection('reports').doc(reportId).get()
+    if (!reportDoc.exists) return res.status(404).json({ error: 'Report not found' })
+
+    const report = reportDoc.data()
+    const input = { report_id: reportId, uid: report.creatorUid, room: report.room, post_id: report.postId, reasoning }
+
+    await executeTool(action, input)
+    console.log(`[admin] Resolved report ${reportId} with action: ${action}`)
+    res.json({ success: true })
+  } catch (error) {
+    console.error('[admin] Error resolving report:', error)
+    res.status(500).json({ error: error.message })
+  }
 })
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }))

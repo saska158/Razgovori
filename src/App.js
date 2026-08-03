@@ -9,6 +9,7 @@ import SignUp from './pages/Sign-Up'
 import EmailVerification from './pages/EmailVerification'
 import MyChats from './pages/MyChats'
 import UserProfile from './pages/UserProfile'
+import AdminPage from './pages/AdminPage'
 import AuthRequired from './components/AuthRequired'
 import { AuthProvider } from './contexts/authContext'
 import { ModerationProvider, useModerationTrace } from './contexts/moderationContext'
@@ -46,6 +47,7 @@ const App = () => {
                   <Route path='my-chats' element={<MyChats />} />
                 </Route>
                 <Route path='user/:profileUid' element={<UserProfile />} />
+                <Route path='admin' element={<AdminPage />} />
               </Route>
               <Route path='sign-in' element={<SignIn />} />
               <Route path='sign-up' element={<SignUp />} />

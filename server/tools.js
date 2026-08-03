@@ -178,6 +178,18 @@ const TOOL_DEFINITIONS = [
     }
   },
   {
+    name: 'escalate_to_human',
+    description: 'Escalate to a human admin when evidence genuinely points in both directions, cultural or satirical context is unclear, or you lack enough signal to distinguish a real violation from a false report. Do not use this as a default — only escalate when you truly cannot make a confident decision after gathering context.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        report_id: { type: 'string' },
+        reasoning: { type: 'string', description: 'Explain specifically what is uncertain and what evidence points in each direction' }
+      },
+      required: ['report_id', 'reasoning']
+    }
+  },
+  {
     name: 'get_posts_targeting_victim',
     description: 'Find all posts across all rooms that mention a specific user (victim_uid). Uses the mentionedUids field stored on each post. Returns posts sorted by recency, with timing analysis and a coordination signal. Call this when a harassment report suggests the victim may be targeted by multiple users — it reveals whether a pile-on is forming across the platform, not just in one thread.',
     input_schema: {
@@ -392,6 +404,15 @@ const executeTool = async (name, input) => {
         postsInLast24h: postsInLast24h.length,
         coordinationSignal
       }
+    }
+
+    case 'escalate_to_human': {
+      await db.collection('reports').doc(input.report_id).update({
+        status: 'escalated',
+        agentReasoning: input.reasoning,
+        escalatedAt: admin.firestore.FieldValue.serverTimestamp()
+      })
+      return { success: true }
     }
 
     default:

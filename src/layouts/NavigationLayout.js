@@ -5,18 +5,20 @@ import UsersList from "../components/users_list/UsersList"
 import { ClipLoader } from "react-spinners"
 import ErrorMessage from "../components/errors/ErrorMessage"
 import { useMediaQuery } from "react-responsive"
+import { firestore, collection, query, where, onSnapshot } from "../api/firebase"
+
+const ADMIN_UID = process.env.REACT_APP_ADMIN_UID
 
 const NavigationLayout = () => {
   // Context
-  const { user, logOut, authLoading, authError } = useAuth() 
-  console.log('user', user?.uid)
+  const { user, logOut, authLoading, authError } = useAuth()
 
   const isMobile = useMediaQuery({ maxWidth: 767 })
   const isDesktop = useMediaQuery({ minWidth: 768 })
 
   const [navOpen, setNavOpen] = useState(false)
+  const [escalationCount, setEscalationCount] = useState(0)
 
-  // Hooks that don't trigger re-renders  
   const location = useLocation()
 
   const toggleNav = () => {
@@ -27,6 +29,12 @@ const NavigationLayout = () => {
   useEffect(() => {
     setNavOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (user?.uid !== ADMIN_UID) return
+    const q = query(collection(firestore, 'reports'), where('status', '==', 'escalated'))
+    return onSnapshot(q, snap => setEscalationCount(snap.size))
+  }, [user])
 
   if(authError) {
     return <ErrorMessage message={authError} />
@@ -104,15 +112,30 @@ const NavigationLayout = () => {
                 />
                 <span>Profile</span>
               </NavLink>
-              <NavLink 
+              <NavLink
                 to="/my-chats"
-                className={({isActive}) => isActive ? 
-                  'navigation-layout-nav-link active-nav-link' : 
-                  'navigation-layout-nav-link' 
+                className={({isActive}) => isActive ?
+                  'navigation-layout-nav-link active-nav-link' :
+                  'navigation-layout-nav-link'
                 }
               >
                 💬 Chat
               </NavLink>
+              {user?.uid === ADMIN_UID && (
+                <NavLink
+                  to="/admin"
+                  className={({isActive}) => isActive ?
+                    'navigation-layout-nav-link active-nav-link' :
+                    'navigation-layout-nav-link'
+                  }
+                  style={{position: 'relative'}}
+                >
+                  🛡️ Admin
+                  {escalationCount > 0 && (
+                    <span className="escalation-nav-badge">{escalationCount}</span>
+                  )}
+                </NavLink>
+              )}
               {
                 authLoading ? (
                   <ClipLoader color="white" size={30} />

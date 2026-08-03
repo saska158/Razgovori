@@ -5,11 +5,12 @@ const { db } = require('./firebase')
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-const DECISION_TOOLS = new Set(['dismiss_report', 'warn_user', 'remove_post', 'ban_user'])
+const DECISION_TOOLS = new Set(['dismiss_report', 'warn_user', 'remove_post', 'ban_user', 'escalate_to_human'])
 const ACCUMULATING_TOOLS = new Set(['remove_additional_post'])
 const CONTEXT_TOOLS = new Set(['analyze_image', 'call_perspective', 'get_post', 'get_comments', 'get_user_history', 'get_user_violations', 'get_reporter_history', 'get_cross_reports', 'get_posts_by_user_in_room', 'get_posts_targeting_victim'])
 
 const TOOL_LABELS = {
+  escalate_to_human: 'Escalating to human admin',
   analyze_image: 'Analyzing image content',
   call_perspective: 'Scoring toxicity',
   get_post: 'Fetching post content',
@@ -48,6 +49,7 @@ const summarizeResult = (toolName, result) => {
     case 'get_posts_by_user_in_room': return `${result.length} post${result.length !== 1 ? 's' : ''} found`
     case 'get_posts_targeting_victim': return `${result.total} post${result.total !== 1 ? 's' : ''} found, ${result.uniquePerpetratorCount} perpetrator${result.uniquePerpetratorCount !== 1 ? 's' : ''}, coordination: ${result.coordinationSignal}`
     case 'remove_additional_post': return result?.success ? 'Removed' : 'Failed'
+    case 'escalate_to_human': return result?.success ? 'Escalated' : 'Failed'
     default: return result?.success ? 'Done' : 'Unknown'
   }
 }
