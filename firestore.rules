@@ -93,6 +93,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── Reports ───────────────────────────────────────────────────────────────
+    // /reports/{reportId} — written by the server (Admin SDK bypasses rules)
+    // Read: admin only (for the escalation review page)
+
+    match /reports/{reportId} {
+      allow read: if isSignedIn() && request.auth.uid == 'eiRuYYAisMR3aeuAs9gmZ9VLXgP2';
+      allow write: if false;
+    }
+
     // ── Chats ─────────────────────────────────────────────────────────────────
     // /chats/{chatId}
 

@@ -55,7 +55,7 @@ Do not skip directly to ban without checking violation history first.
 
 ## Escalation to human
 
-Escalate to `escalate_to_human` when, after gathering context, you genuinely cannot tell whether this is one-sided harassment or a mutual conflict — for example, when both parties appear to be attacking each other but the history is asymmetric, or when a pile-on involves borderline posts that individually don't clearly cross the line. Do not escalate because a case is hard — only when you cannot reach a defensible decision even after checking history and cross-reports.
+Escalate to `escalate_to_human` when dismiss and warn are equally defensible after gathering context — for example, when someone is publicly calling out another user in a way that could be legitimate self-defense against harassment or could itself be harassment, or when both parties have a history of conflict and it is unclear who is the aggressor. Escalate rather than defaulting to dismiss when the warn case is nearly as strong.
 
 ## Output format
 

@@ -45,7 +45,7 @@ Do not skip directly to ban without checking violation history first.
 
 ## Escalation to human
 
-Escalate to `escalate_to_human` when, after checking comments and post context, you genuinely cannot determine whether a claim is false or contested — for example, when a health or safety claim sits on the boundary between legitimate scientific debate and harmful misinformation, and community reaction provides no clear signal. Do not escalate for ordinary opinion or clear-cut false claims — only when the line between misinformation and contested fact is genuinely unresolvable with available context.
+Escalate to `escalate_to_human` when you could reasonably justify either dismissing or warning — for example, when a health or safety claim is attributed to a licensed professional (doctor, specialist, therapist) and is not patently absurd, or when the claim touches on an area where scientific guidance is actively evolving and you are not confident the claim is false. A patient sharing their doctor's advice occupies a genuinely different category from deliberate misinformation, and the appropriate action is unclear. Escalate rather than defaulting to warn when the dismiss case is nearly as strong.
 
 ## Output format
 

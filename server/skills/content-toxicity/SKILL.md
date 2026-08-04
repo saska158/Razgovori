@@ -43,7 +43,7 @@ Do not skip directly to ban without checking violation history first.
 
 ## Escalation to human
 
-Escalate to `escalate_to_human` when, after gathering relevant context, you genuinely cannot determine whether the language is a violation or acceptable use — for example, when the post uses reclaimed or in-group language where identity cannot be verified, or when community reaction strongly contradicts the surface reading of the content. Do not escalate as a default or because a case is mildly difficult — only when you truly cannot reach a defensible decision.
+Escalate to `escalate_to_human` when warn and dismiss are equally defensible after gathering context — for example, when the post uses language that is reclaimed or in-group slang where the author's identity would change the appropriate action but cannot be verified, or when the same words read as a clear violation in one cultural context and completely acceptable in another. Escalate rather than defaulting to dismiss when the warn case is nearly as strong.
 
 ## Output format
 
