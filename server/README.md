@@ -3,7 +3,7 @@
 A Node.js server that runs an agentic content moderation loop for the Razgovori social media app. When a user reports a post, the server:
 
 1. Routes to the best-matching **skill** via Claude Haiku (with retry if no skill is selected). Image-only posts skip the LLM and route directly to `content-toxicity`.
-2. Runs a **Claude Sonnet moderation agent** that autonomously gathers context and makes a decision: dismiss, warn, remove post, or ban user
+2. Runs a **Claude Sonnet moderation agent** that autonomously gathers context and makes a decision: dismiss, warn, remove post, ban user, or escalate to human. Escalated reports are surfaced to the admin review page in the frontend; a human resolves them via `POST /admin/resolve`
 
 The agent decides which tools to call — including `analyze_image` to inspect attached images (post text is passed as context so combined threats are caught) and `call_perspective` to score the post for toxicity using the Perspective API. Both scores are gathered as part of the agent's reasoning, not pre-computed before it runs.
 
@@ -122,7 +122,22 @@ The decision is not returned in this response — the agent runs asynchronously.
 
 Server-sent events (SSE) stream for a report. Returns events as the router and moderation agent run. See the SSE event types table below for the full list.
 
-Possible `action` values in the final `decision` event: `dismiss_report`, `warn_user`, `remove_post`, `ban_user`
+Possible `action` values in the final `decision` event: `dismiss_report`, `warn_user`, `remove_post`, `ban_user`, `escalate_to_human`
+
+### `POST /admin/resolve`
+
+Resolves an escalated report. Called by the admin page when a human makes a decision.
+
+**Body:**
+```json
+{
+  "reportId": "xyz789",
+  "action": "warn_user",
+  "reasoning": "The post was borderline — warning is appropriate given no prior history."
+}
+```
+
+`action` must be one of: `dismiss_report`, `warn_user`, `remove_post`, `ban_user`. Executes the same tool as the agent would, writing the result to Firestore and updating the report status.
 
 ### `GET /health`
 

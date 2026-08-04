@@ -14,7 +14,7 @@ The project has two parts:
 When a user reports a post:
 1. A **router agent** (Claude Haiku) reads the report and selects the most appropriate moderation skill. Image-only posts skip the LLM and route directly to `content-toxicity`.
 2. A **moderation agent** (Claude Sonnet) runs an agentic loop — autonomously deciding which tools to call, including `analyze_image` to inspect any attached image (downloaded and sent as base64; AVIF images are converted to JPEG via Cloudinary before analysis), `call_perspective` to score toxicity, and fetching post content, comments, user history, and violation history from Firestore. Post text is passed as context to image analysis so combined threats (e.g. a house photo + "I know where you live") are caught. For harassment cases it can also remove additional posts discovered during investigation before finalizing.
-3. The decision (dismiss / warn / remove / ban) is written back to Firestore in real time, along with any additional posts removed during investigation
+3. The decision (dismiss / warn / remove / ban / escalate to human) is written back to Firestore in real time, along with any additional posts removed during investigation. When the agent escalates, the report is marked `status: escalated` and appears in the admin review page for a human to resolve.
 
 Available skills: `content-toxicity`, `harassment`, `misinformation`, `threats-and-violence`
 
@@ -59,6 +59,14 @@ ANTHROPIC_API_KEY=
 PERSPECTIVE_API_KEY=
 FIREBASE_SERVICE_ACCOUNT=
 ```
+
+For the admin review page, add `REACT_APP_ADMIN_UID` to the root `.env`:
+
+```
+REACT_APP_ADMIN_UID=<your Firebase UID>
+```
+
+The admin page (`/admin`) is only accessible to the user whose UID matches this value. It shows all reports where the agent escalated to human, with the agent's uncertainty reasoning and action buttons to resolve them.
 
 | Key | Where to get it |
 |---|---|

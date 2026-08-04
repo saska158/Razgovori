@@ -43,6 +43,10 @@ Check `get_user_violations` before finalizing any decision. Escalate to `ban_use
 
 Do not skip directly to ban without checking violation history first.
 
+## Escalation to human
+
+Escalate to `escalate_to_human` when, after checking comments and post context, you genuinely cannot determine whether a claim is false or contested — for example, when a health or safety claim sits on the boundary between legitimate scientific debate and harmful misinformation, and community reaction provides no clear signal. Do not escalate for ordinary opinion or clear-cut false claims — only when the line between misinformation and contested fact is genuinely unresolvable with available context.
+
 ## Output format
 
 Call exactly one of:
@@ -50,3 +54,4 @@ Call exactly one of:
 - `warn_user` — with reasoning explaining what the misleading claim is
 - `remove_post` — with reasoning explaining the pattern or severity of the false claim
 - `ban_user` — with reasoning referencing the violation history that justifies escalation
+- `escalate_to_human` — with reasoning explaining what specifically is unresolvable and why

@@ -53,6 +53,10 @@ Check `get_user_violations` before finalizing any decision. Escalate to `ban_use
 
 Do not skip directly to ban without checking violation history first.
 
+## Escalation to human
+
+Escalate to `escalate_to_human` when, after gathering context, you genuinely cannot tell whether this is one-sided harassment or a mutual conflict — for example, when both parties appear to be attacking each other but the history is asymmetric, or when a pile-on involves borderline posts that individually don't clearly cross the line. Do not escalate because a case is hard — only when you cannot reach a defensible decision even after checking history and cross-reports.
+
 ## Output format
 
 Call exactly one of:
@@ -60,3 +64,4 @@ Call exactly one of:
 - `warn_user` — with reasoning explaining the targeted behavior
 - `remove_post` — with reasoning explaining the harassment pattern or pile-on
 - `ban_user` — with reasoning referencing the violation history that justifies escalation
+- `escalate_to_human` — with reasoning explaining what specifically is unresolvable and why
