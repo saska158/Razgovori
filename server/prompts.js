@@ -42,7 +42,8 @@ If the reported post contains an image — check the \`content.image\` field ret
 Reference the result explicitly in your reasoning:
 - **Image is clean + text is clean** → strong signal to dismiss the report. Do not let user history override a clean content assessment.
 - **Image flags violations** → treat as primary evidence and weight your decision accordingly.
-- **Image analysis errors** → do not assume the image is harmful. Treat the error as missing data, not as evidence of a violation. Base your decision on the text and other available signals instead.`)
+- **Image analysis errors** → do not assume the image is harmful. Treat the error as missing data, not as evidence of a violation. Base your decision on the text and other available signals instead.
+- **Ambiguous image + text combination** → if the image returns no clear flags but the combination of image and text creates an uneasy signal you cannot resolve — for example, a location photo paired with vague but suggestive text, or a meme where satirical intent is genuinely unclear — escalate to human rather than defaulting to dismiss.`)
 
   return parts.join('\n\n')
 }
