@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/authContext'
 import { firestore, collection, query, where, onSnapshot } from '../api/firebase'
 
@@ -86,11 +87,16 @@ const EscalationCard = ({ report, onResolved }) => {
 
 const AdminPage = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [escalations, setEscalations] = useState([])
   const [resolved, setResolved] = useState(new Set())
   const [loading, setLoading] = useState(true)
 
   const isAdmin = user?.uid === ADMIN_UID
+
+  useEffect(() => {
+    if (!user) navigate('/')
+  }, [user])
 
   useEffect(() => {
     if (!isAdmin) return
