@@ -1508,4 +1508,27 @@ textarea::placeholder {
     font-size: .9rem;
   }
 
+  .admin-page {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 1.5em 1em;
+  }
+
+  .escalation-list {
+    max-width: 100%;
+  }
+
+  .escalation-card {
+    padding: 1em;
+  }
+
+  .escalation-actions {
+    flex-direction: column;
+  }
+
+  .escalation-action-btn {
+    width: 100%;
+    text-align: center;
+  }
+
 }
