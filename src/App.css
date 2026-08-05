@@ -193,7 +193,7 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4em;
+  gap: clamp(1.5em, 4vh, 4em);
   padding-bottom: 2.5em;
   background-color: var(--dark-green);
   color: var(--light);
@@ -203,7 +203,6 @@ textarea::placeholder {
   left: 0;
   height: 100vh;
   width: 30%;
-  
 }
 
 .navigation-layout-nav-links {
