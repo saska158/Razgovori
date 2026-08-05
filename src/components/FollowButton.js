@@ -38,9 +38,7 @@ const FollowButton = ({currentUser, targetUser, type, style=null}) => {
 
     try {
       await followToggle(e, currentUser, targetUser)
-      const updatedDoc = await getDoc(doc(firestore, "profiles", currentUser.uid))
-      const following = updatedDoc.data().following || []
-      setIsFollowing(following.includes(targetUser.uid))
+      setIsFollowing(prev => !prev)
     } catch(error) {
       console.error("Error toggling follow:", error)
       setError("Failed to toggle follow status. Please try again.")
