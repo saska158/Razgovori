@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 import { auth, signInWithEmailAndPassword } from "../api/firebase"
 import { PulseLoader } from "react-spinners"
 import ErrorMessage from "../components/errors/ErrorMessage"
@@ -58,7 +59,13 @@ const SignIn = () => {
   }
     
   return (
-    <div className="sign-in-up-container">
+    <motion.div
+      className="sign-in-up-container"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2, ease: "easeInOut" }}
+    >
       <div className="sign-in-up-content">
         { location.state?.message ? <p>{location.state.message}</p> : null }
       <img
@@ -92,7 +99,7 @@ const SignIn = () => {
       </form>
       { error && <ErrorMessage message={error} /> }
       </div>
-    </div>
+    </motion.div>
   )
 }
 

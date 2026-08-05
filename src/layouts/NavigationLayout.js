@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom"
+import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "../contexts/authContext"
 import UsersList from "../components/users_list/UsersList"
 import { ClipLoader } from "react-spinners"
@@ -195,7 +196,18 @@ const NavigationLayout = () => {
           </p>
         </div>
       </nav>
-      <Outlet context={{ toggleNav }} />
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          style={{ flex: 1, minWidth: 0 }}
+        >
+          <Outlet context={{ toggleNav }} />
+        </motion.div>
+      </AnimatePresence>
       { isDesktop && <UsersList /> }
     </div>
   )

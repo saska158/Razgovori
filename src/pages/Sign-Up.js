@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 import { 
     auth, 
     createUserWithEmailAndPassword, 
@@ -123,7 +124,13 @@ const SignUp = () => {
   }
 
   return (
-    <div className="sign-in-up-container">
+    <motion.div
+      className="sign-in-up-container"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2, ease: "easeInOut" }}
+    >
       <div className="sign-in-up-content">
       <img
         src={`${process.env.PUBLIC_URL}/images/logo-green-2.png`}
@@ -180,7 +187,7 @@ const SignUp = () => {
       </form>
       { error && <ErrorMessage message={error} /> }
       </div>
-    </div>
+    </motion.div>
   )
 }
 

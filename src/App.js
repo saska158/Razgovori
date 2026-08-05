@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import NavigationLayout from './layouts/NavigationLayout'
 import RoomsLayout from './layouts/RoomsLayout'
@@ -28,32 +28,41 @@ const GlobalModerationTrace = () => {
   )
 }
 
+const AppRoutes = () => {
+  const location = useLocation()
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={() => window.location.reload()}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <Routes location={location} key={location.pathname}>
+          <Route element={<NavigationLayout />}>
+            <Route path='/' element={<RoomsLayout />}>
+              <Route index element={<Homepage roomId="watching" />} />
+              <Route path=':roomId' element={<Homepage />} />
+            </Route>
+            <Route element={<AuthRequired />}>
+              <Route path='my-chats' element={<MyChats />} />
+            </Route>
+            <Route path='user/:profileUid' element={<UserProfile />} />
+            <Route path='admin' element={<AdminPage />} />
+          </Route>
+          <Route path='sign-in' element={<SignIn />} />
+          <Route path='sign-up' element={<SignUp />} />
+          <Route path='email-verification' element={<EmailVerification />} />
+        </Routes>
+      </AnimatePresence>
+    </ErrorBoundary>
+  )
+}
+
 const App = () => {
   return (
     <AuthProvider>
       <ModerationProvider>
         <BrowserRouter>
-          <ErrorBoundary
-            FallbackComponent={ErrorFallback}
-            onReset={() => window.location.reload()}
-          >
-            <Routes>
-              <Route element={<NavigationLayout />}>
-                <Route path='/' element={<RoomsLayout />}>
-                  <Route index element={<Homepage roomId="watching" />} />
-                  <Route path=':roomId' element={<Homepage />} />
-                </Route>
-                <Route element={<AuthRequired />}>
-                  <Route path='my-chats' element={<MyChats />} />
-                </Route>
-                <Route path='user/:profileUid' element={<UserProfile />} />
-                <Route path='admin' element={<AdminPage />} />
-              </Route>
-              <Route path='sign-in' element={<SignIn />} />
-              <Route path='sign-up' element={<SignUp />} />
-              <Route path='email-verification' element={<EmailVerification />} />
-            </Routes>
-          </ErrorBoundary>
+          <AppRoutes />
           <GlobalModerationTrace />
         </BrowserRouter>
       </ModerationProvider>

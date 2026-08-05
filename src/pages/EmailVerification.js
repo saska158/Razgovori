@@ -1,6 +1,7 @@
 import { auth, reload } from "../api/firebase"
 import { useState, useEffect } from "react"
 import { Navigate, useNavigate } from "react-router-dom"
+import { motion } from "framer-motion"
 import { useAuth } from "../contexts/authContext"
 import ErrorMessage from "../components/errors/ErrorMessage"
 
@@ -61,7 +62,13 @@ const EmailVerification = () => {
   }, [isEmailVerified])
 
   return (
-    <div className="sign-in-up-container">
+    <motion.div
+      className="sign-in-up-container"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2, ease: "easeInOut" }}
+    >
       {
         !isEmailVerified ? (
           <div className="content-container">
@@ -91,7 +98,7 @@ const EmailVerification = () => {
         ) : <Navigate to="/" />
       }
       { error && <ErrorMessage message={error} /> }
-    </div>
+    </motion.div>
   )
 }
 
