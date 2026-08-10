@@ -97,6 +97,8 @@ You can also pass an image URL in `postImage` — the agent will call `analyze_i
 ## Script to run it
 
 ```bash
+cd My-social-media-Waste-of-time/server
+
 # terminal 1 — start the server
 node index.js
 
