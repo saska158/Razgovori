@@ -94,7 +94,7 @@ You can also pass an image URL in `postImage` — the agent will call `analyze_i
 
 ---
 
-## Script to run it
+## Option 1 — run via script (no UI needed)
 
 ```bash
 cd My-social-media-Waste-of-time/server
@@ -108,6 +108,33 @@ node demo.js
 # or pass your own post text
 node demo.js "Some post text you want to test"
 ```
+
+---
+
+## Option 2 — run via the UI (full end-to-end)
+
+Use this to see the complete flow — report triggered from the app, decision reflected back in the UI. You need two user accounts (reporter and post author).
+
+```bash
+# Terminal 1 — React frontend (from repo root)
+npm start
+# → http://localhost:3000
+
+# Terminal 2 — Moderation server
+cd server
+npm start
+# → http://localhost:4000
+```
+
+1. Sign in as the **post author** and create a post with content you want to test
+2. Sign out, sign in as the **reporter**
+3. Find the post and click the **Report** button
+4. Watch the server terminal — the investigation trace streams there in real time
+5. Once the agent finishes, the UI updates automatically:
+   - **As the reporter** — you'll see a status message on the post you reported
+   - **As the post author** (sign back in) — you'll see a banner at the top of your feed
+
+To verify the Firestore write, open the Firebase console → your project → Firestore → `reports` collection.
 
 ---
 
