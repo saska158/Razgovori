@@ -15,22 +15,18 @@ The moderation agent is a Node.js server embedded in the My social media Waste o
 
 ## How it works
 
-A report arrives at `POST /report` with the post text, image URL, room, and user IDs. The pipeline then runs in three stages:
+A report arrives at `POST /report` with the post text, image URL, room, and user IDs. The pipeline then runs in two stages:
 
-**Stage 1 — Triage (Perspective API)**
-The post text is scored for toxicity (0–1).
-- Score < 0.05 → auto-dismissed (genuinely clean content)
-- Score ≥ 0.90 → fast-tracked directly to the `content-toxicity` skill
-- Score 0.05–0.89 → passes to the router
-
-**Stage 2 — Routing (Claude Haiku)**
+**Stage 1 — Routing (Claude Haiku)**
 A lightweight model reads the post and picks the most appropriate skill:
 - `content-toxicity` — hate speech, slurs, dehumanising language
 - `harassment` — targeted attacks, pile-ons, coordinated targeting
 - `misinformation` — false claims, health misinformation
 - `threats-and-violence` — explicit threats, calls for violence
 
-**Stage 3 — Investigation (Claude Sonnet)**
+Image-only posts skip the router and go directly to `content-toxicity`.
+
+**Stage 2 — Investigation (Claude Sonnet)**
 The agent loops (up to 10 iterations), calling tools to gather context:
 - `get_post`, `get_comments` — fetch the reported content and community reaction
 - `call_perspective` — score toxicity directly within the agent loop
@@ -41,7 +37,7 @@ The agent loops (up to 10 iterations), calling tools to gather context:
 - `get_posts_by_user_in_room`, `get_posts_targeting_victim` — detect coordinated patterns across the platform
 - `remove_additional_post` — remove related posts discovered mid-investigation
 
-When the agent has enough signal, it calls a decision tool (`dismiss_report`, `warn_user`, `remove_post`, or `ban_user`). Before the decision is finalised, the agent is asked to self-verify — it reflects on whether it is confident, and can revise or gather more context before confirming.
+When the agent has enough signal, it calls a decision tool (`dismiss_report`, `warn_user`, `remove_post`, `ban_user`, or `escalate_to_human`). Before the decision is finalised, the agent is asked to self-verify — it reflects on whether it is confident, and can revise or gather more context before confirming.
 
 ---
 
