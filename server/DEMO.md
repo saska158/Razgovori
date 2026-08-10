@@ -129,8 +129,8 @@ npm start
 1. Sign in as the **post author** and create a post with content you want to test
 2. Sign out, sign in as the **reporter**
 3. Find the post and click the **Report** button
-4. Watch the server terminal — the investigation trace streams there in real time
-5. Once the agent finishes, the UI updates automatically:
+4. The UI has a built-in SSE stream — the moderation trace and final decision are shown in real time directly in the app.
+5. Once the agent finishes:
    - **As the reporter** — you'll see a status message on the post you reported
    - **As the post author** (sign back in) — you'll see a banner at the top of your feed
 
