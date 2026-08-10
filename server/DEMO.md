@@ -193,13 +193,22 @@ Report kX9mQpL2nR7vYwBc written to Firestore — collection: reports
 
 ## Expected output (roughly)
 
-The agent writes to Firestore and the React frontend reflects the result immediately.
+**Decision:** WARN_USER
 
-**Reporter** sees a status message on the post they reported:
-> "Your report has been reviewed. Action has been taken."
+**Why:** High toxicity score combined with clear exclusionary language — but no prior violations, so a warning is proportionate.
 
-**Post author** sees a banner at the top of their feed:
-> "One of your posts was flagged by our moderation system. Please review our community guidelines."
+**Diagnostic notes:**
+Skill selected: `harassment` — post uses group-based othering ("you people") with explicit exclusion ("nobody wants you in this community"). Perspective score: 0.847. Reporter credibility: 2 prior reports filed, credible. Prior violations on author: none.
+
+**Findings:**
+- "You people are all the same" — group-based othering, signals targeted dismissal
+- "Nobody wants you in this community" — explicit attempt to expel a user
+- Toxicity score 0.847 — high signal, consistent with the language pattern
+- First offence — escalating to removal or ban would be disproportionate
+
+**Action taken:**
+- `reports/{id}`: status `warned`, skill, score, reasoning, and timestamp written
+- `profiles/{uid}`: `warned: true` set on the author's profile
 
 **In Firestore** (`reports` collection):
 ```json
@@ -220,3 +229,7 @@ The agent writes to Firestore and the React frontend reflects the result immedia
   "warned": true
 }
 ```
+
+**In the UI** (if the React app is running):
+- Reporter sees: *"Your report has been reviewed. Action has been taken."*
+- Post author sees a banner: *"One of your posts was flagged by our moderation system. Please review our community guidelines."*
